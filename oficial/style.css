@@ -1,0 +1,94 @@
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: #f0f2f5; }
+  body { font-family: "Inter", sans-serif; color: #1a1a2e; }
+
+  header {
+    background: #000; color: #fff; padding: 16px 28px;
+    display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  header a.voltar {
+    color: #ccc; text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 4px;
+    border: 1px solid #444; padding: 6px 12px; border-radius: 8px;
+  }
+  header a.voltar:hover { border-color: #FFB71B; color: #FFB71B; }
+  header .logo {
+    width: 36px; height: 36px; background: #fff; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  header h1 { font-size: 17px; font-weight: 700; }
+  header span { font-size: 12px; color: #aaa; margin-left: 4px; }
+
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  .passo { background: #fff; border-radius: 14px; padding: 22px 26px; margin-bottom: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+  .passo-titulo { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .passo-num { width: 24px; height: 24px; border-radius: 50%; background: #1a1a2e; color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .passo-titulo h2 { font-size: 15px; font-weight: 700; }
+  .passo.disabled { opacity: 0.45; pointer-events: none; }
+
+  .upload-card { border: 2px dashed #d0d5dd; border-radius: 12px; padding: 30px; text-align: center; cursor: pointer; position: relative; transition: border-color .15s, background .15s; }
+  .upload-card:hover, .upload-card.drag { border-color: #ffb71b; background: #fff5f5; }
+  .upload-card .icon { font-size: 36px; margin-bottom: 8px; }
+  .upload-card h3 { font-size: 15px; margin-bottom: 4px; }
+  .upload-card p { font-size: 13px; color: #888; }
+  .upload-card input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .link-modelo { display: block; text-align: center; margin-top: 10px; background: none; border: none; color: #111c4e; font-size: 13px; cursor: pointer; text-decoration: underline; font-family: inherit; }
+
+  .sel-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+  .sel-bar .contagem { font-size: 13px; color: #555; }
+  .sel-bar .contagem b { color: #1a1a2e; }
+  .sel-actions { display: flex; gap: 8px; }
+  .sel-actions button { font-size: 12.5px; font-weight: 600; padding: 7px 14px; border-radius: 8px; border: 1px solid #d0d5dd; background: #fff; cursor: pointer; color: #333; }
+  .sel-actions button:hover { border-color: #e63946; color: #e63946; }
+
+  #grade { display: flex; flex-wrap: wrap; gap: 16px; }
+  .card-etiqueta { position: relative; border-radius: 10px; padding: 8px; background: #fafafa; border: 2px solid transparent; transition: border-color .15s, opacity .15s; cursor: pointer; }
+  .card-etiqueta.on { border-color: #111c4e; background: #fff5f5; }
+  .card-etiqueta.off { opacity: 0.35; }
+  .card-etiqueta .check { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; border-radius: 5px; background: #fff; border: 1.5px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; z-index: 5; }
+  .card-etiqueta.on .check { background: #111c4e; border-color: #111c4e; color: #fff; }
+  .card-etiqueta .legenda { font-size: 10.5px; color: #777; text-align: center; margin-top: 5px; max-width: 145px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .btn-gerar { display: block; width: 100%; margin-top: 20px; padding: 16px; background: #111c4e; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .btn-gerar:disabled { background: #ccc; cursor: not-allowed; }
+  .btn-gerar:hover:not(:disabled) { background: #111c4e; }
+
+  .progress-wrap { display: none; margin-top: 16px; }
+  .progress-wrap.show { display: block; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .progress-bar-bg { background: #f0f0f0; border-radius: 99px; height: 9px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #ecd195, #ffb71b); border-radius: 99px; transition: width .2s; }
+  .progress-status { font-size: 12px; color: #888; margin-top: 6px; }
+
+  .btn-download { display: none; width: 100%; margin-top: 14px; padding: 16px; background: #00C4B3; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; text-align: center; text-decoration: none; }
+  .btn-download.show { display: block; }
+  .btn-download:hover { background: #00C4B3; opacity: 55%; }
+
+  .status-erro { color: #c00; font-weight: 600; font-size: 13px; margin-top: 10px; }
+
+  #renderizador { position: fixed; left: -9999px; top: 0; }
+
+  .etq-oficial { width: 141.75pt; height: 240.75pt; background: #fff; font-family: "Roboto Condensed", sans-serif; border: 1pt black solid; font-size: 5pt; }
+  .etq-oficial .pai { display: flex; flex-direction: column; gap: 1pt; padding-left: 3pt; }
+  .etq-oficial .title { font-weight: 700; font-size: 6pt; width: 133pt; height: 18pt; margin-top: 1.5pt; }
+  .etq-oficial .bodyContent { font-size: 4.5pt; width: 133pt; height: 5pt; }
+  .etq-oficial .bodyComposicao { font-size: 4.5pt; width: 133pt; height: 10pt; }
+  .etq-oficial .bodyImagem { font-size: 5pt; width: 133pt; height: 49pt; display: flex; flex-direction: row; }
+  .etq-oficial .image { width: 68.51pt; }
+  .etq-oficial .bodyTextEmbalagem { font-size: 4.5pt; width: 133pt; height: 28pt; }
+  .etq-oficial .textImage { display: flex; align-items: center; padding-left: 2pt; }
+  .etq-oficial .bodyTextImportador { font-size: 4.5pt; width: 133pt; height: 43pt; }
+  .etq-oficial .bodyImgInmetro { font-family: 'Arial Black', Arial, 'Helvetica Neue', Helvetica, sans-serif; margin-left: -1.7pt; font-weight: 900; position: relative; font-size: 5pt; width: 138.5pt; height: 65.2pt; border: 4pt solid black; background: black; }
+  .etq-oficial .bodyImgInmetro::before { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 6pt; z-index: 0; }
+  .etq-oficial .bodyImgInmetro > * { position: relative; z-index: 1; }
+  .etq-oficial .selo-seguranca { position: absolute; top: 3.5pt; left: 6.80pt; font-weight: 200; font-size: 12pt; white-space: nowrap; }
+  .etq-oficial .selo-registro { position: absolute; top: 23.08pt; left: 50pt; font-size: 5pt; text-align: center; line-height: 1.1; }
+  .etq-oficial .selo-brics { position: absolute; top: 35pt; left: 7pt; width: 23pt; }
+  .etq-oficial .selo-compulsorio { position: absolute; top: 39pt; left: 29.15pt; font-weight: 400; font-size: 8pt; white-space: nowrap; }
+  .etq-oficial .selo-inmetro { position: absolute; top: 22pt; left: 95pt; width: 1.05cm; height: 1.1cm; }
+  .etq-oficial .aviso-erro { color: #c00; font-weight: 700; }
+  .etq-oficial .bodyLoteValidade { font-size: 4.5pt; width: 133pt; display: flex; justify-content: space-between; align-items: flex-end; }
+  .etq-oficial .validade-gtin { text-align: right; }
+  .etq-oficial .aviso-asfixia { display: flex; align-items: center; gap: 2pt; }
+  .etq-oficial .atencao { font-weight: 700; font-size: 6.5pt; white-space: nowrap; flex-shrink: 0; }
