@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Etiqueta Simplificada — Gerador Miniso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Inter:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: #f0f2f5; }
+  body { font-family: "Inter", sans-serif; color: #1a1a2e; }
+
+  header { background: #1a1a2e; color: #fff; padding: 16px 28px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  header a.voltar { color: #ccc; text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 4px; border: 1px solid #444; padding: 6px 12px; border-radius: 8px; }
+  header a.voltar:hover { border-color: #e63946; color: #fff; }
+  header .logo { width: 36px; height: 36px; background: #e63946; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  header h1 { font-size: 17px; font-weight: 700; }
+  header span { font-size: 12px; color: #aaa; margin-left: 4px; }
+
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  .passo { background: #fff; border-radius: 14px; padding: 22px 26px; margin-bottom: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+  .passo-titulo { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .passo-num { width: 24px; height: 24px; border-radius: 50%; background: #1a1a2e; color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .passo-titulo h2 { font-size: 15px; font-weight: 700; }
+  .passo.disabled { opacity: 0.45; pointer-events: none; }
+
+  .upload-card { border: 2px dashed #d0d5dd; border-radius: 12px; padding: 30px; text-align: center; cursor: pointer; position: relative; transition: border-color .15s, background .15s; }
+  .upload-card:hover, .upload-card.drag { border-color: #e63946; background: #fff5f5; }
+  .upload-card .icon { font-size: 36px; margin-bottom: 8px; }
+  .upload-card h3 { font-size: 15px; margin-bottom: 4px; }
+  .upload-card p { font-size: 13px; color: #888; }
+  .upload-card input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .link-modelo { display: block; text-align: center; margin-top: 10px; background: none; border: none; color: #e63946; font-size: 13px; cursor: pointer; text-decoration: underline; font-family: inherit; }
+
+  .sel-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+  .sel-bar .contagem { font-size: 13px; color: #555; }
+  .sel-bar .contagem b { color: #1a1a2e; }
+  .sel-actions { display: flex; gap: 8px; }
+  .sel-actions button { font-size: 12.5px; font-weight: 600; padding: 7px 14px; border-radius: 8px; border: 1px solid #d0d5dd; background: #fff; cursor: pointer; color: #333; }
+  .sel-actions button:hover { border-color: #e63946; color: #e63946; }
+
+  #grade { display: flex; flex-wrap: wrap; gap: 16px; }
+  .card-etiqueta { position: relative; border-radius: 10px; padding: 8px; background: #fafafa; border: 2px solid transparent; transition: border-color .15s, opacity .15s; cursor: pointer; }
+  .card-etiqueta.on { border-color: #e63946; background: #fff5f5; }
+  .card-etiqueta.off { opacity: 0.35; }
+  .card-etiqueta .check { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; border-radius: 5px; background: #fff; border: 1.5px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; z-index: 5; }
+  .card-etiqueta.on .check { background: #e63946; border-color: #e63946; color: #fff; }
+  .card-etiqueta .legenda { font-size: 10.5px; color: #777; text-align: center; margin-top: 5px; max-width: 145px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .btn-gerar { display: block; width: 100%; margin-top: 20px; padding: 16px; background: #e63946; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .btn-gerar:disabled { background: #ccc; cursor: not-allowed; }
+  .btn-gerar:hover:not(:disabled) { background: #c0303d; }
+
+  .progress-wrap { display: none; margin-top: 16px; }
+  .progress-wrap.show { display: block; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .progress-bar-bg { background: #f0f0f0; border-radius: 99px; height: 9px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #e63946, #ff6b6b); border-radius: 99px; transition: width .2s; }
+  .progress-status { font-size: 12px; color: #888; margin-top: 6px; }
+
+  .btn-download { display: none; width: 100%; margin-top: 14px; padding: 16px; background: #2e7d32; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; text-align: center; text-decoration: none; }
+  .btn-download.show { display: block; }
+  .btn-download:hover { background: #1b5e20; }
+
+  .status-erro { color: #c00; font-weight: 600; font-size: 13px; margin-top: 10px; }
+
+  #renderizador { position: fixed; left: -9999px; top: 0; }
+
+  .etq-simples { width: 226.77pt; height: 141.73pt; background: #fff; border: 1pt black solid; font-family: "Roboto Condensed", sans-serif; font-size: 5pt; padding: 6pt; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .etq-simples .desc { font-weight: 700; font-size: 6pt; margin-bottom: 3pt; }
+  .etq-simples .gtin { font-weight: 700; font-size: 7.5pt; margin-bottom: 3pt; }
+  .etq-simples .comp { font-size: 5pt; margin-bottom: 3pt; }
+  .etq-simples .imp { font-size: 5pt; margin-bottom: auto; }
+  .etq-simples .val { font-weight: 700; font-size: 6pt; margin-top: 4pt; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="voltar" href="../">← Início</a>
+  <div class="logo">🏷️</div>
+  <div><h1>Etiqueta Simplificada</h1></div>
+</header>
+
+<div class="wrap">
+
+  <div class="passo" id="passoUpload">
+    <div class="passo-titulo"><div class="passo-num">1</div><h2>Envie a planilha de dados</h2></div>
+    <div class="upload-card" id="uploadCard">
+      <div class="icon">📂</div>
+      <h3>Arraste a planilha aqui</h3>
+      <p>ou clique para selecionar o arquivo (.xlsx)</p>
+      <input type="file" id="fileInput" accept=".xlsx">
+    </div>
+    <button class="link-modelo" onclick="baixarModelo()">📥 Baixar planilha modelo (.xlsx)</button>
+    <div class="status-erro" id="erroUpload" style="display:none"></div>
+  </div>
+
+  <div class="passo disabled" id="passoSelecao">
+    <div class="passo-titulo"><div class="passo-num">2</div><h2>Escolha quais etiquetas gerar</h2></div>
+    <div class="sel-bar">
+      <div class="contagem"><b id="numSelecionados">0</b> de <span id="numTotal">0</span> selecionadas</div>
+      <div class="sel-actions">
+        <button onclick="marcarTodos(true)">Selecionar todos</button>
+        <button onclick="marcarTodos(false)">Limpar seleção</button>
+      </div>
+    </div>
+    <div id="grade"></div>
+
+    <button class="btn-gerar" id="btnGerar" disabled onclick="gerarEtiquetas()">Selecione ao menos 1 etiqueta</button>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-label"><span>Gerando etiquetas...</span><span id="progressPct">0%</span></div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-status" id="progressStatus">Preparando...</div>
+    </div>
+
+    <a class="btn-download" id="btnDownload" download="etiquetas_simplificada.zip">⬇️ Baixar etiquetas (.zip)</a>
+  </div>
+
+</div>
+
+<div id="renderizador"></div>
+
+<script>
+let dadosBrutos = [];
+let selecionados = new Set();
+
+function esc(v) {
+  if (v === null || v === undefined || v === 0 || v === "0") return "";
+  return String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function getCampo(linha, nomes) {
+  for (const k of Object.keys(linha)) {
+    const nk = k.toLowerCase().trim();
+    if (nomes.includes(nk)) {
+      let v = linha[k];
+      if (v === null || v === undefined) return "";
+      if (typeof v === "number") return v.toLocaleString("fullwide", { useGrouping: false });
+      return String(v).trim();
+    }
+  }
+  return "";
+}
+function getGtin(linha) { return getCampo(linha, ["gtin", "ean"]); }
+function nomeArquivoSeguro(v) { return String(v).replace(/[\/\\:*?"<>|\r\n]+/g, "_").trim(); }
+
+function montarEtiqueta(linha) {
+  const desc = esc(getCampo(linha, ["descricao", "descrição", "nomeproduto"]));
+  const gtin = esc(getGtin(linha));
+  const composicao = esc(getCampo(linha, ["composicao", "composição"]));
+  const importador = esc(getCampo(linha, ["importador"]));
+  const validade = esc(getCampo(linha, ["validade"]));
+  const el = document.createElement("div");
+  el.className = "etq-simples";
+  el.innerHTML = `
+    <div class="desc">${desc}</div>
+    <div class="gtin">${gtin}</div>
+    <div class="comp">Composição: ${composicao}</div>
+    <div class="imp">${importador}</div>
+    <div class="val">Validade: ${validade}</div>`;
+  return { el, dims: { w: 226.77, h: 141.73, orientation: "landscape" } };
+}
+
+const uploadCard = document.getElementById("uploadCard");
+uploadCard.addEventListener("dragover", e => { e.preventDefault(); uploadCard.classList.add("drag"); });
+uploadCard.addEventListener("dragleave", () => uploadCard.classList.remove("drag"));
+uploadCard.addEventListener("drop", e => {
+  e.preventDefault(); uploadCard.classList.remove("drag");
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+});
+document.getElementById("fileInput").addEventListener("change", e => {
+  if (e.target.files[0]) processFile(e.target.files[0]);
+});
+
+function processFile(file) {
+  const erroBox = document.getElementById("erroUpload");
+  erroBox.style.display = "none";
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const wb = XLSX.read(ev.target.result, { type: "array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const linhas = XLSX.utils.sheet_to_json(ws, { defval: "" });
+      dadosBrutos = linhas.filter(l => String(l.NomeProduto || l.Descricao || l["Descrição"] || "").trim() !== "");
+      if (!dadosBrutos.length) {
+        erroBox.textContent = "Nenhuma linha válida encontrada (verifique a coluna NomeProduto/Descrição).";
+        erroBox.style.display = "block";
+        return;
+      }
+      selecionados = new Set(dadosBrutos.map((_, i) => i));
+      document.getElementById("passoSelecao").classList.remove("disabled");
+      renderizarGrade();
+    } catch (err) {
+      console.error(err);
+      erroBox.textContent = "Erro ao ler a planilha. Confirme que é um .xlsx válido.";
+      erroBox.style.display = "block";
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function baixarModelo() {
+  const wb = XLSX.utils.book_new();
+  const dados = [
+    ["NomeProduto", "Composicao", "Importador", "Validade", "Gtin"],
+    ["Fone de Ouvido Bluetooth", "ABS, componentes eletrônicos.", "Miniso Brasil Importação e Comércio de Artigos Ltda. CNPJ: 12.345.678/0001-90", "12 meses", "6923953312345"],
+    ["Almofada Decorativa Unicórnio", "Cobertura: 100% poliéster; Preenchimento: 100% poliéster.", "Miniso Brasil Importação e Comércio de Artigos Ltda. CNPJ: 12.345.678/0001-90", "24 meses", "6923953398765"],
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(dados);
+  ws["!cols"] = [{wch:32},{wch:38},{wch:55},{wch:12},{wch:16}];
+  XLSX.utils.book_append_sheet(wb, ws, "Planilha1");
+  XLSX.writeFile(wb, "modelo_etiqueta_simplificada.xlsx");
+}
+
+function renderizarGrade() {
+  const grade = document.getElementById("grade");
+  grade.innerHTML = "";
+  dadosBrutos.forEach((linha, i) => {
+    const { el: previa } = montarEtiqueta(linha);
+    previa.style.transform = "scale(0.7)";
+    previa.style.transformOrigin = "top left";
+    const holder = document.createElement("div");
+    holder.style.width = (226.77*0.7) + "pt";
+    holder.style.height = (141.73*0.7) + "pt";
+    holder.style.overflow = "hidden";
+    holder.appendChild(previa);
+
+    const card = document.createElement("div");
+    card.className = "card-etiqueta " + (selecionados.has(i) ? "on" : "off");
+    card.onclick = () => toggleSelecao(i);
+    const check = document.createElement("div");
+    check.className = "check";
+    check.textContent = selecionados.has(i) ? "✓" : "";
+    const legenda = document.createElement("div");
+    legenda.className = "legenda";
+    const rotulo = getCampo(linha, ["nomeproduto", "descricao", "descrição"]) || getGtin(linha) || `Linha ${i+1}`;
+    legenda.textContent = rotulo;
+    legenda.title = rotulo;
+
+    card.appendChild(check);
+    card.appendChild(holder);
+    card.appendChild(legenda);
+    grade.appendChild(card);
+  });
+  document.getElementById("numTotal").textContent = dadosBrutos.length;
+  atualizarContagem();
+}
+
+function toggleSelecao(i) {
+  if (selecionados.has(i)) selecionados.delete(i); else selecionados.add(i);
+  const card = document.querySelectorAll(".card-etiqueta")[i];
+  const ligado = selecionados.has(i);
+  card.classList.toggle("on", ligado);
+  card.classList.toggle("off", !ligado);
+  card.querySelector(".check").textContent = ligado ? "✓" : "";
+  atualizarContagem();
+}
+
+function marcarTodos(ligar) {
+  selecionados = ligar ? new Set(dadosBrutos.map((_, i) => i)) : new Set();
+  renderizarGrade();
+}
+
+function atualizarContagem() {
+  document.getElementById("numSelecionados").textContent = selecionados.size;
+  const btn = document.getElementById("btnGerar");
+  btn.disabled = selecionados.size === 0;
+  btn.textContent = selecionados.size ? `🏷️ Gerar ${selecionados.size} etiqueta(s) em PDF` : "Selecione ao menos 1 etiqueta";
+}
+
+async function esperarAssets(root) {
+  try { await document.fonts.ready; } catch (e) {}
+  const imgs = Array.from(root.querySelectorAll("img"));
+  await Promise.all(imgs.map(img =>
+    (img.complete && img.naturalWidth) ? Promise.resolve()
+    : new Promise(res => { img.addEventListener("load", res); img.addEventListener("error", res); })
+  ));
+  await new Promise(r => setTimeout(r, 150));
+}
+
+async function gerarEtiquetas() {
+  const btn = document.getElementById("btnGerar");
+  btn.disabled = true;
+  document.getElementById("progressWrap").classList.add("show");
+
+  const jsPDFCtor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+  if (!jsPDFCtor || typeof html2canvas !== "function") {
+    document.getElementById("progressStatus").textContent = "Bibliotecas não carregaram (verifique a internet/CDN).";
+    btn.disabled = false;
+    return;
+  }
+
+  const indices = Array.from(selecionados).sort((a, b) => a - b);
+  const zip = new JSZip();
+  const renderizador = document.getElementById("renderizador");
+  const usados = {};
+
+  for (let i = 0; i < indices.length; i++) {
+    const idx = indices[i];
+    const linha = dadosBrutos[idx];
+    const pct = Math.round(((i + 1) / indices.length) * 100);
+    document.getElementById("progressFill").style.width = pct + "%";
+    document.getElementById("progressPct").textContent = pct + "%";
+    document.getElementById("progressStatus").textContent = `Gerando: ${getCampo(linha, ["nomeproduto","descricao","descrição"]) || idx+1}`;
+    if (i % 5 === 0) await new Promise(r => setTimeout(r, 0));
+
+    const { el, dims } = montarEtiqueta(linha);
+    renderizador.innerHTML = "";
+    renderizador.appendChild(el);
+    await esperarAssets(renderizador);
+
+    let canvas;
+    try {
+      canvas = await html2canvas(el, { scale: 3, backgroundColor: "#ffffff", useCORS: true, logging: false, width: el.offsetWidth, height: el.offsetHeight });
+    } catch (err) {
+      console.error(err);
+      document.getElementById("progressStatus").textContent = "Falha ao renderizar. Rode via servidor local (não abra o arquivo direto).";
+      btn.disabled = false;
+      return;
+    }
+
+    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    const pdf = new jsPDFCtor({ unit: "pt", format: [dims.w, dims.h], orientation: dims.orientation });
+    pdf.addImage(imgData, "JPEG", 0, 0, dims.w, dims.h, undefined, "FAST");
+
+    let base = getGtin(linha);
+    base = base ? nomeArquivoSeguro(base) : `etiqueta_${String(idx + 1).padStart(3, "0")}`;
+    usados[base] = (usados[base] || 0) + 1;
+    const nomeFinal = usados[base] > 1 ? `${base}_${usados[base]}` : base;
+    zip.file(`${nomeFinal}.pdf`, pdf.output("blob"));
+  }
+
+  document.getElementById("progressStatus").textContent = "Compactando ZIP...";
+  await new Promise(r => setTimeout(r, 0));
+
+  const blob = await zip.generateAsync({ type: "blob" });
+  const url = URL.createObjectURL(blob);
+  const btnDl = document.getElementById("btnDownload");
+  btnDl.href = url;
+  btnDl.download = "etiquetas_simplificada.zip";
+  btnDl.classList.add("show");
+  btnDl.textContent = `⬇️ Baixar ${indices.length} etiqueta(s) (.zip)`;
+
+  document.getElementById("progressStatus").textContent = `✅ ${indices.length} etiqueta(s) prontas!`;
+  btn.disabled = false;
+}
+</script>
+</body>
+</html>
