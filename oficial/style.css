@@ -71,7 +71,7 @@
 
   .etq-oficial { width: 141.75pt; height: 240.75pt; background: #fff; font-family: "Roboto Condensed", sans-serif; border: 1pt black solid; font-size: 5pt; }
   .etq-oficial .pai { display: flex; flex-direction: column; gap: 1pt; padding-left: 3pt; }
-  .etq-oficial .title { font-weight: 700; font-size: 6pt; width: 133pt; height: 18pt; margin-top: 1.5pt; }
+  .etq-oficial .title { font-weight: 700; font-size: 5pt; width: 133pt; height: 18pt; margin-top: 1.5pt; }
   .etq-oficial .bodyContent { font-size: 4.5pt; width: 133pt; height: 5pt; }
   .etq-oficial .bodyComposicao { font-size: 4.5pt; width: 133pt; height: 10pt; }
   .etq-oficial .bodyImagem { font-size: 5pt; width: 133pt; height: 49pt; display: flex; flex-direction: row; }
