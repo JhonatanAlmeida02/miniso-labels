@@ -70,11 +70,17 @@ const AVISOS_IDADE = {
   "2 m":  { imagem: IMG+"idade_atencao_2m.png",  texto: `ESTE BRINQUEDO É RECOMENDÁVEL <br>PARA CRIANÇAS A PARTIR DE 2 (DOIS) MESES DE IDADE.` },
   "12 m": { imagem: IMG+"idade_atencao_12m.png", texto: `ESTE BRINQUEDO <br>NÃO TEM RESTRIÇÃO <br>DE FAIXA ETÁRIA` },
   "18 m": {imagem: IMG+"idade_atencao_18m.png", texto: `ESTE BRINQUEDO <br>NÃO TEM RESTRIÇÃO <br>DE FAIXA ETÁRIA` },
-  "3 a":  { imagem: IMG+"idade_atencao_3anos.png", texto: `NÃO RECOMENDÁVEL PARA CRIANÇAS MENORES DE 3 (TRÊS) ANOS POR CONTER PARTE(S) PEQUENA(S) QUE PODE(M) SER <br>ENGOLIDA(S) OU ASPIRADA(S).` },
+  "3 a":  { imagem: IMG+"idade_atencao_3anos.png", texto: `NÃO RECOMENDÁVEL PARA CRIANÇAS MENORES DE 3 (TRÊS) ANOS POR CONTER PARTE(S) <br>PEQUENA(S) QUE PODE(M) SER <br>ENGOLIDA(S) OU ASPIRADA(S).` },
   "4 a":  { imagem: IMG+"idade_atencao_4anos.png", texto: `NÃO RECOMENDÁVEL PARA CRIANÇAS MENORES DE 3 (TRÊS) ANOS POR CONTER PARTE(S) PEQUENA(S) QUE PODE(M) SER ENGOLIDA(S) OU ASPIRADA(S)` },
   "5 a":  { imagem: IMG+"idade_atencao_5anos.png", texto: `NÃO RECOMENDÁVEL PARA CRIANÇAS MENORES DE 3 (TRÊS) ANOS POR CONTER PARTES(S) PEQUENA(S) QUE PODE(M) SER ENGOLIDA(S) OU ASPIRADA(S)` },
   "6 a":  { imagem: IMG+"idade_atencao_6anos.png", texto: `NÃO RECOMENDÁVEL PARA CRIANÇAS MENORES DE 3 (TRÊS) ANOS POR CONTER PARTE(S) PEQUENA(S) QUE PODE(M) SER ENGOLIDA(S) OU ASPIRADA(S)` },
   "8 a":  {imagem: IMG+"idade_atencao_8anos.png", texto: `NÃO RECOMENDÁVEL PARA CRIANÇAS MENORES DE 3 (TRÊS) ANOS POR CONTER PARTE(S) PEQUENA(S) QUE PODE(M) SER ENGOLIDA(S) OU ASPIRADA(S)` }
+};
+
+const CERTIFICADOR_PADRAO = "brics";
+const CERTIFICADORES = {
+  "brics": { imagem: IMG+"brics_logo.png", alt: "bric's" },
+  "saron": { imagem: IMG+"saron_logo.png", alt: "saron" }
 };
 
 function normalizarIdade(valor) {
@@ -110,6 +116,10 @@ function getCampo(linha, nomes) {
   return "";
 }
 function getGtin(linha) { return getCampo(linha, ["gtin", "ean"]); }
+function getLogoCertificador(linha) {
+  const valor = getCampo(linha, ["orgaocertificador"]).toLowerCase().trim();
+  return CERTIFICADORES[valor] || CERTIFICADORES[CERTIFICADOR_PADRAO];
+}
 function nomeArquivoSeguro(v) { return String(v).replace(/[\/\\:*?"<>|\r\n]+/g, "_").trim(); }
 
 function montarEtiqueta(linha) {
@@ -117,7 +127,8 @@ function montarEtiqueta(linha) {
         composicao = esc(linha.Composicao),
         registro = esc(linha.registro !== undefined ? linha.registro : linha.Registro),
         idade = blocoIdade(linha.Idade),
-        gtin = esc(getGtin(linha));
+        gtin = esc(getGtin(linha)),
+        logoCertificador = getLogoCertificador(linha);
   const el = document.createElement("div");
   el.className = "etq-oficial";
   el.innerHTML = `
@@ -148,7 +159,7 @@ function montarEtiqueta(linha) {
       <div class="bodyImgInmetro">
         <div class="selo-seguranca">Segurança</div>
         <div class="selo-registro"><strong>Registro</strong><br>${registro}</div>
-        <img class="selo-brics" src="${IMG}brics_logo.png" alt="bric's">
+        <img class="selo-brics" src="${logoCertificador.imagem}" alt="${logoCertificador.alt}">
         <div class="selo-compulsorio">Compulsório</div>
         <img class="selo-inmetro" src="${IMG}inmetro_logo.png">
       </div>
@@ -202,12 +213,12 @@ function processFile(file) {
 function baixarModelo() {
   const wb = XLSX.utils.book_new();
   const dados = [
-    ["NomeProduto", "Conteudo", "Composicao", "Registro", "Idade", "Gtin"],
-    ["Fone de Ouvido Bluetooth", "1 Fone", "ABS, componentes eletrônicos.", "001234/2026", "6 a", "6923953312345"],
-    ["Almofada Decorativa Unicórnio", "1 Peça", "Cobertura: 100% poliéster; Preenchimento: 100% poliéster.", "001235/2026", "3 a", "6923953398765"],
+    ["NomeProduto", "Conteudo", "Composicao", "Registro", "Idade", "Gtin", "OrgaoCertificador"],
+    ["Fone de Ouvido Bluetooth", "1 Fone", "ABS, componentes eletrônicos.", "001234/2026", "6 a", "6923953312345", "brics"],
+    ["Almofada Decorativa Unicórnio", "1 Peça", "Cobertura: 100% poliéster; Preenchimento: 100% poliéster.", "001235/2026", "3 a", "6923953398765", "saron"],
   ];
   const ws = XLSX.utils.aoa_to_sheet(dados);
-  ws["!cols"] = [{wch:32},{wch:14},{wch:38},{wch:14},{wch:8},{wch:16}];
+  ws["!cols"] = [{wch:32},{wch:14},{wch:38},{wch:14},{wch:8},{wch:16},{wch:18}];
   XLSX.utils.book_append_sheet(wb, ws, "Planilha1");
   XLSX.writeFile(wb, "modelo_etiqueta_oficial.xlsx");
 }

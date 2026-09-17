@@ -84,7 +84,7 @@
   .etq-oficial .bodyImgInmetro > * { position: relative; z-index: 1; }
   .etq-oficial .selo-seguranca { position: absolute; top: 3.5pt; left: 6.80pt; font-weight: 200; font-size: 12pt; white-space: nowrap; }
   .etq-oficial .selo-registro { position: absolute; top: 23.08pt; left: 50pt; font-size: 5pt; text-align: center; line-height: 1.1; }
-  .etq-oficial .selo-brics { position: absolute; top: 35pt; left: 7pt; width: 23pt; }
+  .etq-oficial .selo-brics { position: absolute; top: 35pt; left: 5pt; width: 23pt; }
   .etq-oficial .selo-compulsorio { position: absolute; top: 39pt; left: 29.15pt; font-weight: 400; font-size: 8pt; white-space: nowrap; }
   .etq-oficial .selo-inmetro { position: absolute; top: 22pt; left: 95pt; width: 1.05cm; height: 1.1cm; }
   .etq-oficial .aviso-erro { color: #c00; font-weight: 700; }
